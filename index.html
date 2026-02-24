@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Clock</title>
+    <!-- Use Tailwind CSS from a CDN for easy styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @font-face { 
+        font-family: 'Digital Clock';
+        src: url("fonts/DigitalClock-Regular.otf") format('opentype');
+        unicode-range: U+002E, U+0030-003A, U+0041-005A;
+        }
+
+        body {
+            background-color: #0f0f0f;
+            color: #FF3939;
+            font-family: 'Digital Clock', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .clock-container {
+            display: flex;
+            background-color: #070707;
+            border: 15px solid black;
+            padding: 2rem 4rem;
+            max-width: 90vw;
+            height: fit-content;
+            text-align: center;
+            /* This prevents the items from wrapping to a new line */
+            flex-wrap: nowrap;
+        }
+        
+        /* Add glow effect to all clock text */
+        #clock span {
+            text-shadow: 0 0 15px #FF0000;
+        }
+
+        .date-part, .time-part, .seconds-part {
+            font-weight: bold;
+            line-height: 1;
+            display: flex; /* Use flexbox to align individual characters */
+            align-items: flex-end; /* Align characters to the bottom */
+        }
+
+        .date-part {
+            font-size: 3.5rem;
+        }
+
+        .time-part {
+            font-size: 5rem;
+        }
+
+        .seconds-part {
+            font-size: 3rem;
+        }
+        
+        /* Give each individual character a fixed width to force alignment */
+        .char {
+            width: 1.0ch;
+            text-align: right;
+        }
+
+        .char-center-align {
+            text-align: center;
+        }
+
+        .char-left-align {
+            text-align: left;
+        }
+
+        /* Adjust width for the blinking colon which is one character wide */
+        .blinking-colon {
+            width: 0.5ch;
+        }
+
+        /* CSS for the blinking colon */
+        .blinking-colon {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 49% {
+                visibility: visible;
+            }
+            50%, 100% {
+                visibility: hidden;
+            }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+    <div class="clock-container flex items-end justify-center ">
+        <div id="clock" class="flex items-end">
+            <div id="date-dd" class="date-part"></div>
+            <div id="date-mm" class="date-part ml-6"></div>
+            <div id="time-hhmm" class="time-part ml-12"></div>
+            <div id="seconds-ss" class="seconds-part ml-2"></div>
+        </div>
+    </div>
+
+    <script>
+        const fullMonths = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+        
+        function updateClock() {
+            const now = new Date();
+            
+            const day = String(now.getDate()).padStart(2, '0');
+            const monthIndex = now.getMonth();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            // Apply custom month formatting rule
+            let formattedMonth = fullMonths[monthIndex];
+            if (formattedMonth === "September") {
+                formattedMonth = "SEPT";
+            } else if (formattedMonth.length > 4) {
+                formattedMonth = formattedMonth.substring(0, 3).toUpperCase() + ".";
+            } else {
+                formattedMonth = formattedMonth.toUpperCase();
+            }
+
+            // Function to render text character by character
+            function renderChars(elementId, text) {
+                const element = document.getElementById(elementId);
+                element.innerHTML = ''; // Clear previous content
+                for (let i = 0; i < text.length; i++) {
+                    const charSpan = document.createElement('span');
+                    charSpan.textContent = text[i];
+                    charSpan.classList.add('char');
+                    if (text[i] === ".") {
+                        charSpan.classList.add('char-left-align');
+                    }
+                    element.appendChild(charSpan);
+                }
+            }
+            
+            // Render each part of the clock
+            renderChars('date-dd', day);
+            renderChars('date-mm', formattedMonth);
+            
+            // Handle the time with the blinking colon
+            const timeElement = document.getElementById('time-hhmm');
+            timeElement.innerHTML = '';
+            
+            const timeString = `${hours}:${minutes}`;
+            for (let i = 0; i < timeString.length; i++) {
+                const charSpan = document.createElement('span');
+                charSpan.textContent = timeString[i];
+                charSpan.classList.add('char');
+                if (timeString[i] === ':') {
+                    charSpan.classList.add('blinking-colon');
+                    charSpan.classList.add('char-center-align');
+                }
+                timeElement.appendChild(charSpan);
+            }
+
+            // Render the seconds
+            renderChars('seconds-ss', seconds);
+        }
+
+        // Initial call to set the clock
+        updateClock();
+
+        // Update the clock every second
+        setInterval(updateClock, 1000);
+
+        document.addEventListener("click", () => {
+            window.close();
+        })
+
+        document.addEventListener("keydown", () => {
+            window.close();
+        })
+    </script>
+</body>
+</html>
